@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Scorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="main.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Cricket Scorer</h1>
+        
+        <div class="score-display text-center">
+            <span class="score-number" id="run">0</span>
+            <span class="score-number">/</span>
+            <span class="score-number" id="wickets">0</span>
+            <div class="over-ball mt-2" id="over-ball">0.0</div>
+        </div>
+        
+        <div class="runboard">
+            <div id="ball-container" class="d-flex justify-content-start flex-wrap">
+                <!-- Ball buttons will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <div class="row">
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_dot">Dot</button></div>
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_1">1</button></div>
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_2">2</button></div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_3">3</button></div>
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_4">4</button></div>
+                <div class="col-4"><button class="btn btn-primary w-100" id="run_6">6</button></div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-4"><button class="btn btn-warning w-100" id="run_wide">Wide</button></div>
+                <div class="col-4"><button class="btn btn-warning w-100" id="run_no_ball">No Ball</button></div>
+                <div class="col-4"><button class="btn btn-danger w-100" id="run_W">Wicket</button></div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button class="btn btn-secondary w-100" id="scoreboard-btn" data-bs-toggle="modal" data-bs-target="#scoreboardModal">
+                <i class="fas fa-table me-2"></i>Scoreboard
+            </button>
+        </div>
+
+        <div class="mt-4">
+            <button class="btn btn-info w-100" id="undo-btn">
+                <i class="fas fa-undo me-2"></i>Undo Last Action
+            </button>
+        </div>
+    </div>
+
+    <!-- Scoreboard Modal -->
+    <div class="modal fade" id="scoreboardModal" tabindex="-1" aria-labelledby="scoreboardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scoreboardModalLabel">Scoreboard</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped" id="scoreboard"></table>
+                    <div id="edited-scores"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

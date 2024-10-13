@@ -1,0 +1,78 @@
+body {
+    background-color: #f0f8ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    max-width: 600px;
+}
+
+.score-display {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.score-number {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.over-ball {
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+
+.action-buttons .btn {
+    margin: 5px;
+    min-width: 80px;
+}
+
+.runboard {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.runboard .btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+    margin: 5px;
+}
+
+#scoreboard-btn, #undo-btn {
+    font-size: 1.2rem;
+}
+
+.modal-content {
+    border-radius: 15px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.ball-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    margin: 3px;
+    border-radius: 50%;
+}
+
+.ball-btn-wide, .ball-btn-noball {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.ball-btn-wicket {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
