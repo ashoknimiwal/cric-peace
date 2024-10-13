@@ -5,6 +5,7 @@ let runs = 0;
 let wickets = 0;
 let edited = [];
 let isNoBall = false;
+let isFreeHit = false;
 
 $(document).ready(function () {
     attachEventListeners();
@@ -27,28 +28,40 @@ function attachEventListeners() {
 }
 
 function playBall(run, score = 0) {
-    if (run === "Wd" || run === "Nb") {
+    if (run === "Wd") {
         runs += score;
         scoreboard[over_no].push(run);
-        if (run === "Nb") toggleNoBall(true);
         addBallButton(run);
+    } else if (run === "Nb") {
+        runs += score;
+        isNoBall = true;
+        // Don't add to scoreboard yet, wait for the next entry
     } else {
         if (isNoBall) {
-            scoreboard[over_no].push(run);
+            runs += score;
+            let noBallDisplay = `Nb+${run}`;
+            scoreboard[over_no].push(noBallDisplay);
+            addBallButton(noBallDisplay);
             toggleNoBall(false);
+            toggleFreeHit(true);
+        } else if (isFreeHit) {
+            runs += score;
+            let freeHitDisplay = `F+${run}`;
+            scoreboard[over_no].push(freeHitDisplay);
+            addBallButton(freeHitDisplay);
+            toggleFreeHit(false);
+            incrementBallCount();
         } else {
+            runs += score;
             scoreboard[over_no].push(run);
-            if (run === "W") wickets++;
-            else runs += score;
+            addBallButton(run);
             
-            ball_no++;
-            if (ball_no >= 6) {
-                ball_no = 0;
-                over_no++;
-                scoreboard.push([]);
+            if (run === "W") {
+                wickets++;
             }
+            
+            incrementBallCount();
         }
-        addBallButton(run);
     }
     
     updateScore();
@@ -60,6 +73,20 @@ function toggleNoBall(isActive) {
     isNoBall = isActive;
     $("#run_no_ball").toggleClass("active", isActive);
     $("#run_wide, #run_W").prop("disabled", isActive);
+}
+
+function toggleFreeHit(isActive) {
+    isFreeHit = isActive;
+    $("#run_W").prop("disabled", isActive);
+}
+
+function incrementBallCount() {
+    ball_no++;
+    if (ball_no >= 6) {
+        ball_no = 0;
+        over_no++;
+        scoreboard.push([]);
+    }
 }
 
 function updateScore() {
@@ -79,7 +106,7 @@ function updateRunboard() {
 
 function addBallButton(run, overIndex, ballIndex) {
     let btnClass = "btn btn-outline-primary ball-btn";
-    if (run === "Wd" || run === "Nb") btnClass = "btn btn-warning ball-btn";
+    if (run.startsWith("Wd") || run.startsWith("Nb") || run.startsWith("F+")) btnClass = "btn btn-warning ball-btn";
     if (run === "W") btnClass = "btn btn-danger ball-btn";
     
     let btn = $(`<button class="${btnClass}">${run}</button>`);
@@ -89,8 +116,15 @@ function addBallButton(run, overIndex, ballIndex) {
 function updateScoreboard() {
     let table = "<tr><th>Over</th><th>Ball-by-Ball</th><th>Runs</th><th>Extras</th></tr>";
     scoreboard.forEach((over, index) => {
-        let overRuns = over.reduce((sum, run) => sum + (run !== "W" && run !== "Wd" && run !== "Nb" ? parseInt(run) || 0 : 0), 0);
-        let extras = over.filter(run => run === "Wd" || run === "Nb").length;
+        let overRuns = over.reduce((sum, run) => {
+            if (run.startsWith("Nb") || run.startsWith("F+")) {
+                return sum + (parseInt(run.split("+")[1]) || 1);
+            } else if (run !== "W" && run !== "Wd") {
+                return sum + (parseInt(run) || 0);
+            }
+            return sum;
+        }, 0);
+        let extras = over.filter(run => run.startsWith("Wd") || run.startsWith("Nb")).length;
         let ballByBall = over.join(", ");
         table += `<tr><td>${index + 1}</td><td>${ballByBall}</td><td>${overRuns}</td><td>${extras}</td></tr>`;
     });
@@ -110,13 +144,26 @@ function undoLastAction() {
     }
     
     let lastAction = lastOver.pop();
-    if (lastAction === "W") wickets--;
-    else if (lastAction !== "Wd" && lastAction !== "Nb") runs -= parseInt(lastAction) || 0;
+    if (lastAction === "W") {
+        wickets--;
+    } else if (lastAction.startsWith("Nb")) {
+        runs -= (parseInt(lastAction.split("+")[1]) || 1);
+    } else if (lastAction.startsWith("F+")) {
+        runs -= parseInt(lastAction.split("+")[1]) || 0;
+    } else if (lastAction !== "Wd") {
+        runs -= parseInt(lastAction) || 0;
+    }
     
     if (ball_no < 0) {
         ball_no = 5;
         over_no--;
     }
+    
+    // Reset No Ball and Free Hit states
+    isNoBall = false;
+    isFreeHit = false;
+    $("#run_no_ball").removeClass("active");
+    $("#run_wide, #run_W").prop("disabled", false);
     
     updateScore();
     updateRunboard();
