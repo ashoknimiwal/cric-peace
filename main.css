@@ -93,3 +93,8 @@ body {
     border-color: #8406df;
     color: white;
 }
+
+.btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

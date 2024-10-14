@@ -21,10 +21,22 @@ function attachEventListeners() {
     $("#run_4").on("click", () => playBall("4", 4));
     $("#run_6").on("click", () => playBall("6", 6));
     $("#run_wide").on("click", () => playBall("Wd", 1));
-    $("#run_no_ball").on("click", () => playBall("Nb", 1));
+    $("#run_no_ball").on("click", handleNoBall);
     $("#run_W").on("click", () => playBall("W", 0));
     $("#scoreboard-btn").on("click", updateScoreboard);
     $("#undo-btn").on("click", undoLastAction);
+    $(".noBallRun").on("click", handleNoBallRuns);
+}
+
+function handleNoBall() {
+    toggleNoBall(true);
+    $('#noBallModal').modal('show');
+}
+
+function handleNoBallRuns() {
+    let runsScored = parseInt($(this).data('runs'));
+    playBall(`Nb${runsScored}`, runsScored);
+    $('#noBallModal').modal('hide');
 }
 
 function playBall(run, score = 0) {
@@ -32,36 +44,29 @@ function playBall(run, score = 0) {
         runs += score;
         scoreboard[over_no].push(run);
         addBallButton(run);
-    } else if (run === "Nb") {
+    } else if (run.startsWith("Nb")) {
+        runs += score + 1; // Add runs scored on the no-ball plus 1 for the no-ball itself
+        scoreboard[over_no].push(run);
+        addBallButton(run);
+        toggleNoBall(false);
+        toggleFreeHit(true);
+    } else if (isFreeHit) {
         runs += score;
-        isNoBall = true;
-        // Don't add to scoreboard yet, wait for the next entry
+        let freeHitDisplay = `${run}`;
+        scoreboard[over_no].push(freeHitDisplay);
+        addBallButton(freeHitDisplay);
+        toggleFreeHit(false);
+        incrementBallCount();
     } else {
-        if (isNoBall) {
-            runs += score;
-            let noBallDisplay = `Nb${run}`;
-            scoreboard[over_no].push(noBallDisplay);
-            addBallButton(noBallDisplay);
-            toggleNoBall(false);
-            toggleFreeHit(true);
-        } else if (isFreeHit) {
-            runs += score;
-            let freeHitDisplay = `${run}`;
-            scoreboard[over_no].push(freeHitDisplay);
-            addBallButton(freeHitDisplay);
-            toggleFreeHit(false);
-            incrementBallCount();
-        } else {
-            runs += score;
-            scoreboard[over_no].push(run);
-            addBallButton(run);
-            
-            if (run === "W") {
-                wickets++;
-            }
-            
-            incrementBallCount();
+        runs += score;
+        scoreboard[over_no].push(run);
+        addBallButton(run);
+        
+        if (run === "W") {
+            wickets++;
         }
+        
+        incrementBallCount();
     }
     
     updateScore();
@@ -73,11 +78,21 @@ function toggleNoBall(isActive) {
     isNoBall = isActive;
     $("#run_no_ball").toggleClass("active", isActive);
     $("#run_wide, #run_W").prop("disabled", isActive);
+    if (isActive) {
+        $("#run_wide, #run_W").addClass("disabled");
+    } else {
+        $("#run_wide, #run_W").removeClass("disabled");
+    }
 }
 
 function toggleFreeHit(isActive) {
     isFreeHit = isActive;
     $("#run_W").prop("disabled", isActive);
+    if (isActive) {
+        $("#run_W").addClass("disabled");
+    } else {
+        $("#run_W").removeClass("disabled");
+    }
 }
 
 function incrementBallCount() {
@@ -151,11 +166,13 @@ function undoLastAction() {
     if (lastAction === "W") {
         wickets--;
     } else if (lastAction.startsWith("Nb")) {
-        runs -= (parseInt(lastAction.split("+")[1]) || 1);
+        runs -= (parseInt(lastAction.split("Nb")[1]) || 0) + 1; // Subtract runs scored on no-ball plus the extra run
     } else if (lastAction.startsWith("F+")) {
         runs -= parseInt(lastAction.split("+")[1]) || 0;
     } else if (lastAction !== "Wd") {
         runs -= parseInt(lastAction) || 0;
+    } else if (lastAction === "Wd") {
+        runs -= 1; // Subtract one run for wide
     }
     
     if (ball_no < 0) {
@@ -167,7 +184,7 @@ function undoLastAction() {
     isNoBall = false;
     isFreeHit = false;
     $("#run_no_ball").removeClass("active");
-    $("#run_wide, #run_W").prop("disabled", false);
+    $("#run_wide, #run_W").prop("disabled", false).removeClass("disabled");
     
     updateScore();
     updateRunboard();
