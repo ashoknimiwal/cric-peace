@@ -46,7 +46,7 @@ function playBall(run, score = 0) {
             toggleFreeHit(true);
         } else if (isFreeHit) {
             runs += score;
-            let freeHitDisplay = `F+${run}`;
+            let freeHitDisplay = `${run}`;
             scoreboard[over_no].push(freeHitDisplay);
             addBallButton(freeHitDisplay);
             toggleFreeHit(false);
@@ -106,8 +106,12 @@ function updateRunboard() {
 
 function addBallButton(run, overIndex, ballIndex) {
     let btnClass = "btn btn-outline-primary ball-btn";
-    if (run.startsWith("Wd") || run.startsWith("Nb") || run.startsWith("F+")) btnClass = "btn btn-warning ball-btn";
-    if (run === "W") btnClass = "btn btn-danger ball-btn";
+    if (run.startsWith("Wd")) btnClass += " btn ball-btn";
+    else if (run.startsWith("Nb")) btnClass += " ball-btn-noball";
+    else if (run === "W") btnClass += " ball-btn-wicket";
+    else if (run === "4") btnClass += " ball-btn-four";
+    else if (run === "6") btnClass += " ball-btn-six";
+    else btnClass += " btn-outline-primary";
     
     let btn = $(`<button class="${btnClass}">${run}</button>`);
     $("#ball-container").append(btn);
