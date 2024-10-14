@@ -39,7 +39,7 @@ function playBall(run, score = 0) {
     } else {
         if (isNoBall) {
             runs += score;
-            let noBallDisplay = `Nb+${run}`;
+            let noBallDisplay = `Nb${run}`;
             scoreboard[over_no].push(noBallDisplay);
             addBallButton(noBallDisplay);
             toggleNoBall(false);
