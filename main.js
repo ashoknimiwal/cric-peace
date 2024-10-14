@@ -6,6 +6,7 @@ let wickets = 0;
 let edited = [];
 let isNoBall = false;
 let isFreeHit = false;
+let ballHistory = [];
 
 $(document).ready(function () {
     attachEventListeners();
@@ -40,6 +41,16 @@ function handleNoBallRuns() {
 }
 
 function playBall(run, score = 0) {
+    let previousState = {
+        runs: runs,
+        wickets: wickets,
+        over_no: over_no,
+        ball_no: ball_no,
+        isNoBall: isNoBall,
+        isFreeHit: isFreeHit,
+        lastBall: scoreboard[over_no].length > 0 ? scoreboard[over_no][scoreboard[over_no].length - 1] : null
+    };
+
     if (run === "Wd") {
         runs += score;
         scoreboard[over_no].push(run);
@@ -68,6 +79,8 @@ function playBall(run, score = 0) {
         
         incrementBallCount();
     }
+    
+    ballHistory.push(previousState);
     
     updateScore();
     updateRunboard();
@@ -151,42 +164,38 @@ function updateScoreboard() {
 }
 
 function undoLastAction() {
-    if (over_no === 0 && scoreboard[0].length === 0) return;
+    if (ballHistory.length === 0) return;
     
-    let lastOver = scoreboard[over_no];
-    if (lastOver.length === 0) {
-        over_no--;
-        lastOver = scoreboard[over_no];
-        ball_no = lastOver.length - 1;
+    let previousState = ballHistory.pop();
+    
+    runs = previousState.runs;
+    wickets = previousState.wickets;
+    over_no = previousState.over_no;
+    ball_no = previousState.ball_no;
+    isNoBall = previousState.isNoBall;
+    isFreeHit = previousState.isFreeHit;
+  
+    // Update the scoreboard by removing the last ball in the over
+    if (previousState.lastBall === null) {
+      scoreboard[over_no] = [];
     } else {
-        ball_no--;
+      scoreboard[over_no].pop();
     }
-    
-    let lastAction = lastOver.pop();
-    if (lastAction === "W") {
-        wickets--;
-    } else if (lastAction.startsWith("Nb")) {
-        runs -= (parseInt(lastAction.split("Nb")[1]) || 0) + 1; // Subtract runs scored on no-ball plus the extra run
-    } else if (lastAction.startsWith("F+")) {
-        runs -= parseInt(lastAction.split("+")[1]) || 0;
-    } else if (lastAction !== "Wd") {
-        runs -= parseInt(lastAction) || 0;
-    } else if (lastAction === "Wd") {
-        runs -= 1; // Subtract one run for wide
+  
+    // Handle toggling no-ball and free-hit states
+    if (previousState.lastBall && previousState.lastBall.startsWith("Nb")) {
+      toggleNoBall(false); // Explicitly reset no-ball state
+    } else {
+      toggleNoBall(isNoBall); 
     }
-    
-    if (ball_no < 0) {
-        ball_no = 5;
-        over_no--;
-    }
-    
-    // Reset No Ball and Free Hit states
-    isNoBall = false;
-    isFreeHit = false;
-    $("#run_no_ball").removeClass("active");
-    $("#run_wide, #run_W").prop("disabled", false).removeClass("disabled");
-    
+    toggleFreeHit(isFreeHit);
+
+    // Re-enable the wide button when undoing any ball
+    $("#run_wide").prop("disabled", false);
+    $("#run_wide").removeClass("disabled");
+  
+    // Update the score, runboard, and scoreboard to reflect the undone action
     updateScore();
     updateRunboard();
     updateScoreboard();
-}
+  }
